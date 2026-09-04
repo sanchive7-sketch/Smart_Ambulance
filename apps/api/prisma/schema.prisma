@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  DRIVER
+  HOSPITAL
+  ADMIN
+  TRAFFIC_CONTROLLER
+}
+
+enum EmergencyStatus {
+  REQUESTED
+  MATCHING
+  ASSIGNED
+  DRIVER_EN_ROUTE
+  PATIENT_ONBOARD
+  AT_HOSPITAL
+  COMPLETED
+  CANCELLED
+}
+
+enum AmbulanceStatus {
+  AVAILABLE
+  ASSIGNED
+  EN_ROUTE
+  AT_HOSPITAL
+  OFFLINE
+}
+
+enum CorridorStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  ACTIVE
+  COMPLETED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ambulance {
+  id           String          @id @default(cuid())
+  displayCode  String          @unique
+  status       AmbulanceStatus @default(AVAILABLE)
+  capabilities String[]
+  latitude     Float?
+  longitude    Float?
+  driverName   String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model Hospital {
+  id           String   @id @default(cuid())
+  name         String
+  latitude     Float
+  longitude    Float
+  specialties  String[]
+  availableIcu Int      @default(0)
+  availableBeds Int     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model EmergencyRequest {
+  id              String          @id @default(cuid())
+  emergencyType   String
+  severity        String
+  patientSummary  String?
+  latitude        Float
+  longitude       Float
+  status          EmergencyStatus @default(REQUESTED)
+  ambulanceId     String?
+  hospitalId      String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model GreenCorridorRequest {
+  id          String         @id @default(cuid())
+  emergencyId String
+  status      CorridorStatus @default(REQUESTED)
+  reason      String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+}

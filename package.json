@@ -1,0 +1,18 @@
+{
+  "name": "smart-emergency-response-platform",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace @serp/api\" \"npm run dev --workspace @serp/web\"",
+    "dev:api": "npm run dev --workspace @serp/api",
+    "dev:web": "npm run dev --workspace @serp/web",
+    "build": "npm run build --workspaces",
+    "db:generate": "npm run db:generate --workspace @serp/api",
+    "db:migrate": "npm run db:migrate --workspace @serp/api",
+    "db:studio": "npm run db:studio --workspace @serp/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
