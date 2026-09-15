@@ -17,7 +17,7 @@ export default function CommandCentre({ overview }: { overview: Overview | null 
         <p>Build one reliable flow first: emergency request to medically suitable ambulance and hospital allocation.</p>
       </section>
 
-      <section className="metrics" aria-label="Emergency overview">
+      <section className="metrics" aria-label="Emergency overview" aria-busy={overview === null}>
         {cards.map(({ label, value, icon: Icon, tone }) => (
           <article className={`metric ${tone}`} key={label}><Icon size={20} /><p>{label}</p><strong>{value}</strong></article>
         ))}

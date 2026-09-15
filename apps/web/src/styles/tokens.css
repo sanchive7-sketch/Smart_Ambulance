@@ -1,0 +1,23 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #132238;
+  background: #f4f7fb;
+  --bg: #f4f7fb;
+  --ink: #132238;
+  --muted: #52657e;
+  --faint: #5b6f89;
+  --line: #dce5f1;
+  --line-strong: #c9d6e8;
+  --brand: #112b63;
+  --brand-hover: #28498d;
+  --accent: #0b8e80;
+  --danger: #b5303c;
+  --warn-bg: #fff3d6;
+  --warn-ink: #8a5d00;
+  --ok-bg: #dff7ef;
+  --ok-ink: #097561;
+  --info-bg: #e0ecff;
+  --info-ink: #1d4fb0;
+  --radius: 16px;
+  --touch: 44px;
+}
