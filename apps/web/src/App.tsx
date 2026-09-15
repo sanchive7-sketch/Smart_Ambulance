@@ -1,19 +1,38 @@
-import { useEffect, useState } from 'react';
-import { Activity, Ambulance, Building2, CircleAlert, Radio, ShieldCheck } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Radio, ShieldCheck } from 'lucide-react';
 import { io } from 'socket.io-client';
-
-type Overview = {
-  activeCases: number;
-  availableAmbulances: number;
-  averageResponseMinutes: number;
-  hospitalLoadPercent: number;
-};
+import CommandCentre from './roles/CommandCentre';
+import UserPanel from './roles/UserPanel';
+import DriverPanel from './roles/DriverPanel';
+import HospitalPanel from './roles/HospitalPanel';
+import TrafficPanel from './roles/TrafficPanel';
+import AdminPanel from './roles/AdminPanel';
+import type { Notice, Overview, Role } from './roles/types';
 
 const apiUrl = 'http://localhost:4000';
+
+const tabs: { id: Role; label: string }[] = [
+  { id: 'command', label: 'Command Centre' },
+  { id: 'user', label: 'User App' },
+  { id: 'driver', label: 'Driver App' },
+  { id: 'hospital', label: 'Hospital' },
+  { id: 'traffic', label: 'Traffic Control' },
+  { id: 'admin', label: 'Admin' },
+];
 
 export default function App() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [apiStatus, setApiStatus] = useState('Checking API');
+  const [activeRole, setActiveRole] = useState<Role>('command');
+  const [notices, setNotices] = useState<Notice[]>([]);
+
+  const notify = useCallback((text: string) => {
+    const id = Date.now() + Math.random();
+    setNotices((prev) => [...prev.slice(-2), { id, text }]);
+    window.setTimeout(() => {
+      setNotices((prev) => prev.filter((n) => n.id !== id));
+    }, 4000);
+  }, []);
 
   useEffect(() => {
     fetch(`${apiUrl}/api/v1/overview`)
@@ -22,62 +41,47 @@ export default function App() {
       .catch(() => setApiStatus('Start the API with npm run dev'));
 
     const socket = io(apiUrl);
-    socket.on('platform:ready', () => setApiStatus('Connected'));
+    socket.on('platform:ready', () => {
+      setApiStatus('Connected');
+      notify('Realtime channel connected');
+    });
     return () => {
       socket.disconnect();
     };
-  }, []);
-
-  const cards = [
-    { label: 'Active cases', value: overview?.activeCases ?? '-', icon: CircleAlert, tone: 'red' },
-    { label: 'Available ambulances', value: overview?.availableAmbulances ?? '-', icon: Ambulance, tone: 'blue' },
-    { label: 'Average response', value: overview ? `${overview.averageResponseMinutes} min` : '-', icon: Activity, tone: 'teal' },
-    { label: 'Hospital load', value: overview ? `${overview.hospitalLoadPercent}%` : '-', icon: Building2, tone: 'amber' },
-  ];
+  }, [notify]);
 
   return (
     <main className="shell">
       <header className="topbar">
         <div className="brand"><ShieldCheck size={22} /> <span>SERP</span></div>
         <nav aria-label="Application roles">
-          <button className="active">Command Centre</button>
-          <button>User App</button><button>Driver App</button><button>Hospital</button><button>Traffic Control</button>
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              aria-pressed={activeRole === t.id}
+              className={activeRole === t.id ? 'active' : ''}
+              onClick={() => setActiveRole(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
         </nav>
         <span className={`connection ${apiStatus === 'Connected' ? 'online' : ''}`}><Radio size={14} /> {apiStatus}</span>
       </header>
 
-      <section className="hero">
-        <p className="eyebrow">LOCAL DEVELOPMENT</p>
-        <h1>Smart Emergency Response Platform</h1>
-        <p>Build one reliable flow first: emergency request to medically suitable ambulance and hospital allocation.</p>
-      </section>
+      {activeRole === 'command' && <CommandCentre overview={overview} />}
+      {activeRole === 'user' && <UserPanel notify={notify} />}
+      {activeRole === 'driver' && <DriverPanel notify={notify} />}
+      {activeRole === 'hospital' && <HospitalPanel notify={notify} />}
+      {activeRole === 'traffic' && <TrafficPanel notify={notify} />}
+      {activeRole === 'admin' && <AdminPanel overview={overview} notify={notify} />}
 
-      <section className="metrics" aria-label="Emergency overview">
-        {cards.map(({ label, value, icon: Icon, tone }) => (
-          <article className={`metric ${tone}`} key={label}><Icon size={20} /><p>{label}</p><strong>{value}</strong></article>
+      <div className="toasts" aria-live="polite" aria-atomic="false">
+        {notices.map((n) => (
+          <div className="toast" key={n.id}>{n.text}</div>
         ))}
-      </section>
-
-      <section className="workspace">
-        <article className="panel matching">
-          <p className="eyebrow">SMART ALLOCATION - DEVELOPMENT EXAMPLE</p>
-          <h2>Cardiac emergency: choose the capable ambulance</h2>
-          <div className="comparison">
-            <div className="ambulance-card rejected"><Ambulance size={24} /><h3>AMB-KA-22</h3><p>2.3 km - BLS + oxygen</p><span>Not selected: no cardiac capability</span></div>
-            <div className="ambulance-card selected"><Ambulance size={24} /><h3>AMB-KA-07</h3><p>3.2 km - ALS + cardiac + oxygen</p><span>Selected: medically suitable</span></div>
-          </div>
-        </article>
-        <aside className="panel next">
-          <p className="eyebrow">NEXT IMPLEMENTATION TASKS</p>
-          <ol>
-            <li>Create Prisma migration and fictional seed data.</li>
-            <li>Add secure login and role-based API access.</li>
-            <li>Build ambulance and hospital admin management.</li>
-            <li>Implement emergency request and scoring endpoint.</li>
-          </ol>
-          <a href="http://localhost:4000/health" target="_blank" rel="noreferrer">Open API health check</a>
-        </aside>
-      </section>
+      </div>
     </main>
   );
 }
