@@ -1,5 +1,7 @@
 # Smart Emergency Response Platform
 
+This is a application that connect all the three units like user, ambulance drivers, hospital together when a emergency situation happens.
+
 A learning project for coordinating emergency requests, ambulances, hospitals, and green-corridor approvals. The core rule is simple: select the **nearest medically capable available ambulance**, not just the nearest ambulance.
 
 This repository starts as a real full-stack foundation, not only a UI mockup:
@@ -24,3 +26,4 @@ The app works locally without payment details or API keys. Read [ARCHITECTURE.md
 ## Important safety boundary
 
 The green-corridor module records and routes a request for traffic-authority approval. It must never directly operate public traffic signals without a formal authorized integration.
+
