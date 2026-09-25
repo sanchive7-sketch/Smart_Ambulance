@@ -10,9 +10,10 @@ Build and test one vertical slice at a time.
 
 ## Phase 2 - Identity and access
 
-- [ ] Register/login endpoints.
-- [ ] Password hashing and JWT refresh flow.
-- [ ] Role-based route protection.
+- [x] Role-specific login, logout, and session-check endpoints for seeded demo users.
+- [x] Salted scrypt password hashes and eight-hour signed cookie sessions.
+- [x] Role-gated dashboards, overview API, and live socket connections.
+- [ ] Self-service registration, password reset, and production identity hardening.
 
 ## Phase 3 - Operations data
 
