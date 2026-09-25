@@ -10,6 +10,7 @@
     "build": "npm run build --workspaces",
     "db:generate": "npm run db:generate --workspace @serp/api",
     "db:migrate": "npm run db:migrate --workspace @serp/api",
+    "db:seed": "npm run db:seed --workspace @serp/api",
     "db:studio": "npm run db:studio --workspace @serp/api"
   },
   "devDependencies": {
