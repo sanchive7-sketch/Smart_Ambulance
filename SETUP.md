@@ -1,109 +1,73 @@
-# Local Setup Guide
+# Hackathon Demo Setup
 
-## 1. Install these tools
+The presentation runs with fictional data. **Docker, PostgreSQL, API keys, and payment details are not needed.**
 
-Install the following once:
+## 1. Install Node.js
 
-1. **Node.js LTS** - includes `npm` and `npx`.
-2. **Docker Desktop** - runs PostgreSQL locally without paying for a cloud database.
-3. **Git** - version control and GitHub upload later.
-4. **VS Code** - recommended editor.
-
-After installing, restart PowerShell and verify:
+Install Node.js LTS, then open a new PowerShell window and check:
 
 ```powershell
 node --version
 npm --version
-docker --version
-git --version
 ```
 
-## 2. Configure environment variables
+Git and VS Code are useful for development, but neither is required to run the demo.
 
-In the project root, copy `.env.example` and rename the copy to `.env`.
+## 2. Configure demo mode
 
-PowerShell command:
+In `C:\Users\Sanchive Kumar\smart_ambulance`, copy the example file if `.env` does not already exist:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Open `.env` in VS Code. For local development, keep the database values unchanged. Replace `JWT_SECRET` with a long random string before you deploy.
+If you already have `.env`, keep it and add these lines:
 
-Do **not** paste secrets in source files. `.env` is ignored by Git and should never be uploaded to GitHub.
+```env
+DEMO_MODE=true
+VITE_DEMO_MODE=true
+```
 
-## 3. Install project packages
+`DEMO_MODE=true` makes the API use in-memory fictional accounts instead of PostgreSQL. `VITE_DEMO_MODE=true` keeps the demo-account hint visible in the web build. Do not paste real patient data or API keys into demo screens.
 
-From the project root:
+## 3. Install and run
+
+Run these commands from the project folder. Paste only the command lines, not the Markdown code-fence markers:
 
 ```powershell
 npx pnpm@11.16.0 install
-npx pnpm@11.16.0 approve-builds --all
-```
-
-This project uses **pnpm**, not `npm`. Do not run `npm install` here because it can conflict with pnpm's workspace dependency layout.
-
-`npx pnpm@11.16.0` works without installing pnpm globally or opening PowerShell as Administrator. Use this exact prefix for every remaining project command.
-
-## 4. Start local PostgreSQL
-
-Open Docker Desktop first, then run:
-
-```powershell
-docker compose up -d
-docker compose ps
-```
-
-You should see a running `serp-postgres` container.
-
-To stop it later:
-
-```powershell
-docker compose down
-```
-
-Your database data remains saved in Docker's `postgres_data` volume.
-
-## 5. Create the database schema
-
-```powershell
 npx pnpm@11.16.0 db:generate
-npx pnpm@11.16.0 db:migrate
-```
-
-When prompted for a migration name, use:
-
-```text
-initial_schema
-```
-
-## 6. Start the application
-
-```powershell
 npx pnpm@11.16.0 dev
 ```
 
-Open these URLs:
+Open `http://localhost:5173`. The API health check at `http://localhost:4000/health` should report `"mode":"demo"`.
 
-- Web application: `http://localhost:5173`
-- API health check: `http://localhost:4000/health`
+This project uses pnpm. Do not run `npm install` in this workspace. The `npx pnpm@11.16.0` prefix avoids a global pnpm installation or Administrator PowerShell.
 
-## API keys - where to paste them
+## 4. Sign in as each role
 
-No API key is needed for the initial local version.
+Choose a workspace on the login page. Each of the three visible roles has its own `/login/<role>` URL and opens only its assigned dashboard. All fictional accounts use password `SerpDemo2026!`.
 
-If you later use a paid or authorized map/traffic service, place keys only in `.env`:
+| Workspace | Email |
+| --- | --- |
+| People | `user@serp.local` or `+91 98765 43210` |
+| Ambulance driver | `driver@serp.local` |
+| Hospital | `hospital@serp.local` |
 
-```env
-MAP_TILES_URL="provider URL"
-TRAFFIC_PROVIDER_API_KEY="your key"
+Click **Use demo** to fill the selected account, then sign in. Use **Sign out** to switch roles. The driver and hospital login pages show fictional inspection details such as vehicle number, equipment, hospital registration, and contact number. Refreshing keeps the session for up to eight hours while the API keeps the same `JWT_SECRET`. With the example placeholder, the API generates a temporary secret each time it starts, so a restart signs everyone out.
+
+See [DEMO_GUIDE.md](DEMO_GUIDE.md) for a short jury walkthrough and what is simulated.
+
+## Optional: use PostgreSQL later
+
+Only do this when you want to continue building the real backend after the hackathon. Install and start Docker Desktop, set `DEMO_MODE=false` in `.env`, then run:
+
+```powershell
+docker compose up -d
+npx pnpm@11.16.0 db:generate
+npx pnpm@11.16.0 db:migrate
+npx pnpm@11.16.0 db:seed
+npx pnpm@11.16.0 dev
 ```
 
-Restart `npx pnpm@11.16.0 dev` after changing `.env`. Never add API keys to React components, GitHub, screenshots, or messages.
-
-## Recommended VS Code extensions
-
-- ESLint
-- Prettier - Code formatter
-- Prisma
-- Docker
+Use `initial_schema` when prompted for a migration name. If changing `VITE_DEMO_MODE`, restart the dev server. Keep secrets in `.env`, which Git ignores.
